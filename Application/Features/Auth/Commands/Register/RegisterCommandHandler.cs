@@ -1,5 +1,4 @@
-﻿using Application.Dtos;
-using Application.Services.Abstractions;
+﻿using Application.Services.Abstractions;
 using MediatR;
 
 namespace Application.Features.Auth.Commands.Register
@@ -25,6 +24,7 @@ namespace Application.Features.Auth.Commands.Register
                 Id = user.Id,
                 Email = user.Email,
                 FullName=user.FullName
+
 
             };
         }

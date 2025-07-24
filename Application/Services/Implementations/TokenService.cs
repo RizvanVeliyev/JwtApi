@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Application.Services.Implementations
 {
-    internal class TokenService:ITokenService
+    public class TokenService : ITokenService
     {
         private readonly IConfiguration _config;
         public TokenService(IConfiguration config)
@@ -21,9 +21,16 @@ namespace Application.Services.Implementations
         {
             var claims = new List<Claim>
         {
+
             new Claim(JwtRegisteredClaimNames.Sub, user.FullName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.Role, user.Role.ToString()),
+             new Claim(ClaimTypes.NameIdentifier, user.Id)
+
+
         };
+
+
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_config["JwtSettings:Secret"]));
@@ -53,6 +60,6 @@ namespace Application.Services.Implementations
                 Created = DateTime.UtcNow
             };
         }
-        
+
     }
 }

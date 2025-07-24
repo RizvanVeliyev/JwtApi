@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities
+﻿using Domain.Enums;
+
+namespace Domain.Entities
 {
     public class User
     {
@@ -11,6 +13,7 @@
         public string FullName { get; set; }
 
         public List<RefreshToken> RefreshTokens { get; set; }
+        public UserRole Role { get; set; }
 
     }
 }

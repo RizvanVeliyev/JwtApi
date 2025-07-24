@@ -25,7 +25,9 @@ namespace Application.Features.Auth.Commands.Login
             return new LoginResponseDto
             {
                 Token = token,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                Role = user.Role
+
             };
         }
     }
