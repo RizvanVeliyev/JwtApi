@@ -1,4 +1,5 @@
-﻿using Application.Features.Auth.Commands.Delete;
+﻿using Application.Features.Auth.Commands.ChangePassword;
+using Application.Features.Auth.Commands.Delete;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.Register;
@@ -39,7 +40,7 @@ namespace JwtApi.Controllers
             return Ok(result);
         }
 
-        [HttpGet("GetAllUsers")]
+        [HttpGet("[action]")]
         public async Task<IActionResult> GetAllUsers()
         {
             var result = await _mediator.Send(new GetAllUsersQuery());
@@ -75,6 +76,18 @@ namespace JwtApi.Controllers
             var command = new UpdateUserCommand { Request=dto};
             var result = await _mediator.Send(command);
             return Ok(result);
+        }
+
+
+        [Authorize]
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequestDto dto)
+        {
+            var command=new ChangePasswordCommand { Request=dto };
+            var result = await _mediator.Send(command);
+            if (!result)
+                return BadRequest("Password not changed");
+            return Ok("Password updated successfully");
         }
 
 

@@ -1,4 +1,5 @@
-﻿using Application.Features.Auth.Commands.Login;
+﻿using Application.Features.Auth.Commands.ChangePassword;
+using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Register;
 using Application.Features.Auth.Commands.Update;
 using Application.Services.Abstractions;
@@ -90,6 +91,21 @@ namespace Application.Services.Implementations
             return Task.FromResult(user);
         }
 
+
+        public Task<bool> ChangePasswordAsync(string userId, ChangePasswordRequestDto dto)
+        {
+            var user = _users.FirstOrDefault(x => x.Id == userId);
+            if (user == null) throw new Exception("User not found");
+
+            if (user.Password != dto.CurrentPassword)
+                throw new Exception("Current password is incorrect");
+
+            if (dto.NewPassword != dto.ConfirmPassword)
+                throw new Exception("New passwords do not match");
+
+            user.Password = dto.NewPassword;
+            return Task.FromResult(true);
+        }
 
     }
 }

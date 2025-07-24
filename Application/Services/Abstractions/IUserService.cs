@@ -1,4 +1,5 @@
-﻿using Application.Features.Auth.Commands.Login;
+﻿using Application.Features.Auth.Commands.ChangePassword;
+using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Register;
 using Application.Features.Auth.Commands.Update;
 using Domain.Entities;
@@ -16,8 +17,7 @@ namespace Application.Services.Abstractions
 
         Task<bool> DeleteUserAsync(string userId);
         Task<User> UpdateUserAsync(string userId, UpdateUserRequestDto dto);
-
-
+        Task<bool> ChangePasswordAsync(string userId, ChangePasswordRequestDto dto);
 
 
     }
