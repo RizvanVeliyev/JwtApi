@@ -3,11 +3,17 @@ using Application.Services.Abstractions;
 using Application.Services.Implementations;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Persistence.Contexts;
 using System.Security.Claims;
 using System.Text;
+using Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
@@ -46,6 +52,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+
+builder.Services.AddPersistence();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddMediatR(typeof(RegisterCommand).Assembly);

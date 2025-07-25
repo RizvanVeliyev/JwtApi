@@ -1,4 +1,5 @@
 ﻿using Application.Features.Auth.Commands.ChangePassword;
+using Application.Features.Auth.Commands.CreateRefreshToken;
 using Application.Features.Auth.Commands.Delete;
 using Application.Features.Auth.Commands.ForgotPassword;
 using Application.Features.Auth.Commands.Login;
@@ -33,6 +34,13 @@ namespace JwtApi.Controllers
             var result = await _mediator.Send(command);
 
             return Ok(result);
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
+        {
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
 
         [HttpPost("login")]

@@ -1,20 +1,35 @@
 ﻿using Application.Services.Abstractions;
 using MediatR;
+using Persistence.Repositories.Abstractions;
 
 namespace Application.Features.Auth.Commands.ForgotPassword
 {
     public class ForgotPasswordHandler : IRequestHandler<ForgotPasswordCommand, string?>
     {
-        private readonly IUserService _userService;
+      
+        private readonly IUserRepository _userRepository;
 
-        public ForgotPasswordHandler(IUserService userService)
+
+        public ForgotPasswordHandler( IUserRepository userRepository = null)
         {
-            _userService = userService;
+            _userRepository = userRepository;
         }
 
         public async Task<string?> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
-            return await _userService.ForgotPasswordAsync(request.Email);
+            var user = await _userRepository.GetByEmailAsync(request.Email);
+            if (user == null)
+                return null;
+
+            var token = Guid.NewGuid().ToString();
+            user.ResetToken = token;
+            user.ResetTokenExpiry = DateTime.UtcNow.AddMinutes(15);
+
+            await _userRepository.SaveChangesAsync();
+            var link = $"http://localhost:5000/api/auth/reset-password?token={token}";
+
+
+            return link;
         }
     }
 

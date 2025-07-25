@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36310.24 d17.14
+VisualStudioVersion = 17.14.36310.24
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JwtApi", "JwtApi\JwtApi.csproj", "{D0B0321F-A95B-40BA-BD57-6AFBE2F218D2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{48309758-21CA-463E-B346-4D0E03FE114C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{D1D66B16-F9B4-48AC-B9E9-790F969BCF65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persistence", "Persistence\Persistence.csproj", "{927F8A0F-2B3D-47A6-B053-1DBD7B73B283}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{D1D66B16-F9B4-48AC-B9E9-790F969BCF65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1D66B16-F9B4-48AC-B9E9-790F969BCF65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1D66B16-F9B4-48AC-B9E9-790F969BCF65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{927F8A0F-2B3D-47A6-B053-1DBD7B73B283}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{927F8A0F-2B3D-47A6-B053-1DBD7B73B283}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{927F8A0F-2B3D-47A6-B053-1DBD7B73B283}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{927F8A0F-2B3D-47A6-B053-1DBD7B73B283}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
