@@ -19,6 +19,10 @@ namespace Application.Services.Abstractions
         Task<User> UpdateUserAsync(string userId, UpdateUserRequestDto dto);
         Task<bool> ChangePasswordAsync(string userId, ChangePasswordRequestDto dto);
 
+        Task<string?> ForgotPasswordAsync(string email);
+        Task<bool> ResetPasswordAsync(string token, string newPassword, string confirmPassword);
+
+
 
     }
 }

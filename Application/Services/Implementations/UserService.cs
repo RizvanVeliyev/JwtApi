@@ -41,11 +41,11 @@ namespace Application.Services.Implementations
         public async Task LogoutAsync(string UserId)
         {
             var user = _users.FirstOrDefault(u => u.Id == UserId);
-            if (user != null)
-            {
-                // Bütün refresh tokenləri silirik
-                user.RefreshTokens.Clear();
-            }
+            //if (user != null)
+            //{
+            //    // Bütün refresh tokenləri silirik
+            //    user.RefreshTokens.Clear();
+            //}
 
             await Task.CompletedTask;
         }
@@ -104,6 +104,40 @@ namespace Application.Services.Implementations
                 throw new Exception("New passwords do not match");
 
             user.Password = dto.NewPassword;
+            return Task.FromResult(true);
+        }
+
+        public Task<string?> ForgotPasswordAsync(string email)
+        {
+            var user=_users.FirstOrDefault(X=>X.Email == email);
+            if (user == null)
+                return Task.FromResult<string?>(null);
+
+            var token=Guid.NewGuid().ToString();
+            user.ResetToken = token;
+            user.ResetTokenExpiry = DateTime.UtcNow.AddMinutes(15);
+
+            var link = $"http://localhost:5000/api/auth/reset-password?token={token}";
+            return Task.FromResult<string?>(link);
+
+        }
+
+        public Task<bool> ResetPasswordAsync(string token, string newPassword, string confirmPassword)
+        {
+            var user = _users.FirstOrDefault(u =>
+                u.ResetToken == token &&
+                u.ResetTokenExpiry > DateTime.UtcNow);
+
+            if (user == null)
+                return Task.FromResult(false);
+
+            if (newPassword != confirmPassword)
+                return Task.FromResult(false);
+
+            user.Password = newPassword;
+            user.ResetToken = null;
+            user.ResetTokenExpiry = null;
+
             return Task.FromResult(true);
         }
 

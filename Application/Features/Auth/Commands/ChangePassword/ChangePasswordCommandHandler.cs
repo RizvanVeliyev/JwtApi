@@ -18,13 +18,7 @@ namespace Application.Features.Auth.Commands.ChangePassword
 
         public async Task<bool> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
         {
-            var claims = _httpContextAccessor.HttpContext.User.Claims;
-
-            foreach (var claim in claims)
-            {
-                Console.WriteLine($"Claim Type: {claim.Type}, Value: {claim.Value}");
-            }
-
+           
             var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return await _userService.ChangePasswordAsync(userId, request.Request);
         }

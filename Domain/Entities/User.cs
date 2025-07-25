@@ -15,5 +15,8 @@ namespace Domain.Entities
         public List<RefreshToken> RefreshTokens { get; set; }
         public UserRole Role { get; set; }
 
+        public string? ResetToken { get; set; }
+        public DateTime? ResetTokenExpiry { get; set; }
+
     }
 }
