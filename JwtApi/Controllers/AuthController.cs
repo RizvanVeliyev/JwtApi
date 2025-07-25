@@ -58,14 +58,26 @@ namespace JwtApi.Controllers
             return Ok(result);
         }
 
-        [Authorize] // Logout üçün user login olmalıdı
+        //[Authorize] // Logout üçün user login olmalıdı
+        //[HttpPost("logout")]
+        //public async Task<IActionResult> Logout()
+        //{
+        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    var command = new LogoutCommand { UserId = userId };
+        //    await _mediator.Send(command);
+        //    return Ok("Logged out successfully.");
+        //}
+
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> Logout([FromBody] LogoutRequestDto dto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var command = new LogoutCommand { UserId = userId };
-            await _mediator.Send(command);
-            return Ok("Logged out successfully.");
+            var command = new LogoutCommand { RefreshToken = dto.RefreshToken };
+            var result = await _mediator.Send(command);
+
+            if (!result)
+                return BadRequest("Logout failed");
+
+            return Ok("Logged out successfully");
         }
 
 

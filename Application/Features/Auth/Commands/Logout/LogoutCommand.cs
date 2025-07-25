@@ -2,8 +2,8 @@
 
 namespace Application.Features.Auth.Commands.Logout
 {
-    public class LogoutCommand:IRequest<Unit>
+    public class LogoutCommand : IRequest<bool>
     {
-        public string UserId { get; set; }
+        public string RefreshToken { get; set; } = null!;
     }
 }
