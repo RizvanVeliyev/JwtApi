@@ -24,14 +24,11 @@ namespace Application.Features.Auth.Commands.CreateRefreshToken
 
             var refreshToken = user.RefreshTokens.FirstOrDefault(rt => rt.Token == request.RefreshToken);
 
-            // Aşağıdakı şərtləri açıq yazırıq, çünki IsActive property yoxdur
             if (refreshToken == null || refreshToken.Revoked != null || refreshToken.Expires <= DateTime.UtcNow)
                 throw new AuthenticationException("Refresh token is expired or revoked");
 
-            // Refresh token ləğv edilir
             refreshToken.Revoked = DateTime.UtcNow;
 
-            // Yeni refresh token yaradılır və əlavə edilir
             var newRefreshToken = _tokenService.GenerateRefreshToken();
             user.RefreshTokens.Add(newRefreshToken);
 

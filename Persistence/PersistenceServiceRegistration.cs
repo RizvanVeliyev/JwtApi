@@ -9,6 +9,11 @@ namespace Persistence
         public static IServiceCollection AddPersistence(this IServiceCollection services) 
         {
             services.AddScoped<IUserRepository,UserRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+
             return services;
 
         }

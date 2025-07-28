@@ -26,7 +26,7 @@ namespace Application.Features.Auth.Commands.ForgotPassword
             user.ResetTokenExpiry = DateTime.UtcNow.AddMinutes(15);
 
             await _userRepository.SaveChangesAsync();
-            var link = $"http://localhost:5000/api/auth/reset-password?token={token}";
+            var link = $"token={token}";
 
 
             return link;

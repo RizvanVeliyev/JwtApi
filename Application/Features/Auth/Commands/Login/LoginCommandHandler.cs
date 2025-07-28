@@ -22,7 +22,7 @@ namespace Application.Features.Auth.Commands.Login
         {
             var dto = request.Request;
             var user =await _userRepository.GetByEmailAsync(dto.Email);
-            if (user == null || user.Password != dto.Password)
+            if (user == null || user.Password != dto.Password)//hash yoxlanmasi
                 throw new Exception("Invalid credentials");
 
             

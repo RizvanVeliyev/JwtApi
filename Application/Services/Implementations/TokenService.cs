@@ -20,18 +20,12 @@ namespace Application.Services.Implementations
         public string CreateToken(User user)
         {
 
-            var claims = new List<Claim>
-{
-    new Claim(ClaimTypes.Name, user.FullName ?? ""),
-    new Claim(ClaimTypes.NameIdentifier, user.Id),
-    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-    new Claim(ClaimTypes.Role, user.Role.ToString() ?? "")
-};
-
-
-
-
-
+            var claims = new List<Claim>{
+                new Claim(ClaimTypes.Name, user.FullName ?? ""),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, user.Role.ToString() ?? "")
+            };
 
 
             var key = new SymmetricSecurityKey(

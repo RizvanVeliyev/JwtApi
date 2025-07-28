@@ -8,7 +8,7 @@ namespace Domain.Entities
 
         public string Email { get; set; }
 
-        public string Password { get; set; } //hash
+        public string Password { get; set; } //hash yazacam
 
         public string FullName { get; set; }
 
