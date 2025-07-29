@@ -1,4 +1,5 @@
-﻿using Application.Services.Abstractions;
+﻿using Application.Dtos;
+using Application.Services.Abstractions;
 using Domain.Entities;
 using Domain.Enums;
 using MediatR;
@@ -14,12 +15,14 @@ namespace Application.Features.Auth.Commands.Login
         private readonly ITokenService _tokenService;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IEmailService _emailService;
 
-        public LoginCommandHandler(ITokenService tokenService, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public LoginCommandHandler(ITokenService tokenService, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService)
         {
             _tokenService = tokenService;
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailService = emailService;
         }
 
         public async Task<LoginResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -33,6 +36,27 @@ namespace Application.Features.Auth.Commands.Login
             var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
             if (!result.Succeeded)
                 throw new Exception("Invalid credentials");
+
+            if (await _userManager.GetTwoFactorEnabledAsync(user))
+            {
+                var twoFactorToken = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
+
+                await _emailService.SendEmailAsync(new EmailSendDto
+                {
+                    ToEmail = user.Email,
+                    Subject = "Your 2FA Code",
+                    Body = $"Your two-factor authentication code is: {twoFactorToken}"
+                });
+
+                return new LoginResponseDto
+                {
+                    RequiresTwoFactor = true,
+                    Message = "Two-factor authentication code sent to your email."
+                };
+            }
+
+
+
 
             var token = await _tokenService.CreateToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
@@ -49,9 +73,12 @@ namespace Application.Features.Auth.Commands.Login
 
             return new LoginResponseDto
             {
+                RequiresTwoFactor = false,
                 Token = token,
                 RefreshToken = refreshToken,
-                Role = roleEnum
+                Role = roleEnum,
+                Message = "Login successful."
+
 
             };
         }
