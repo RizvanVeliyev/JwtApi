@@ -1,6 +1,8 @@
 ﻿using Application.Services.Abstractions;
+using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Persistence.Repositories.Abstractions;
 using System.Security.Claims;
 
@@ -8,17 +10,19 @@ namespace Application.Features.Auth.Commands.Update
 {
     public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UpdateUserResponseDto>
     {
-        private readonly IUserService _userService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUserRepository _userRepository;
+        private readonly UserManager<AppUser> _userManager;
 
 
 
-        public UpdateUserCommandHandler(IUserService userService, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
+
+        public UpdateUserCommandHandler(IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, UserManager<AppUser> userManager)
         {
-            _userService = userService;
+
             _httpContextAccessor = httpContextAccessor;
             _userRepository = userRepository;
+            _userManager = userManager;
         }
 
         public async Task<UpdateUserResponseDto> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -28,12 +32,12 @@ namespace Application.Features.Auth.Commands.Update
             if (string.IsNullOrEmpty(userId))
                 throw new Exception("User not authorized!");
 
-            var user = await _userRepository.GetByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
                 throw new Exception("User not found");
 
-            user.FullName = request.Request.FullName;
+            user.Name = request.Request.FullName;
 
             await _userRepository.SaveChangesAsync();
 
@@ -43,7 +47,7 @@ namespace Application.Features.Auth.Commands.Update
             {
                 Id = user.Id,
                 Email = user.Email,
-                FullName = user.FullName
+                FullName = user.Name+user.Surname
             };
         }
     }

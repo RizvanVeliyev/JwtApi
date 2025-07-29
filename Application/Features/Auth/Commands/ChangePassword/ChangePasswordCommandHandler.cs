@@ -1,6 +1,7 @@
-﻿using Application.Services.Abstractions;
+﻿using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Persistence.Repositories.Abstractions;
 using System.Security.Claims;
 
@@ -8,15 +9,14 @@ namespace Application.Features.Auth.Commands.ChangePassword
 {
     public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand, bool>
     {
-        
+
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IUserRepository _userRepository;
+        private readonly UserManager<AppUser> _userManager;
 
-
-        public ChangePasswordCommandHandler( IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
+        public ChangePasswordCommandHandler(IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager)
         {
             _httpContextAccessor = httpContextAccessor;
-            _userRepository = userRepository;
+            _userManager = userManager;
         }
 
         public async Task<bool> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
@@ -27,21 +27,17 @@ namespace Application.Features.Auth.Commands.ChangePassword
             if (string.IsNullOrWhiteSpace(userId))
                 throw new UnauthorizedAccessException("User ID not found in token");
 
-            var user = await _userRepository.GetByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 throw new Exception("User not found");
 
             var dto = request.Request;
 
-            if (user.Password != dto.CurrentPassword)
-                throw new Exception("Current password is incorrect");
+            var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
 
-            if (dto.NewPassword != dto.ConfirmPassword)
-                throw new Exception("New passwords do not match");
+            if (!result.Succeeded)
+                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
 
-            user.Password = dto.NewPassword;
-
-            await _userRepository.SaveChangesAsync();
 
             return true;
         }

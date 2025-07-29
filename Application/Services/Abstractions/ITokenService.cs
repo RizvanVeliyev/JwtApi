@@ -4,7 +4,7 @@ namespace Application.Services.Abstractions
 {
     public interface ITokenService
     {
-        string CreateToken(User user);
-        RefreshToken GenerateRefreshToken();
+        Task<string> CreateToken(AppUser user);
+        string GenerateRefreshToken();
     }
 }

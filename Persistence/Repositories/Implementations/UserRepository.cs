@@ -5,71 +5,37 @@ using Persistence.Repositories.Abstractions;
 
 namespace Persistence.Repositories.Implementations
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository:IUserRepository
     {
-        private readonly AppDbContext _context;
+        private readonly AppDbContext _appDbContext;
 
-        public UserRepository(AppDbContext context)
+        public UserRepository(AppDbContext appDbContext)
         {
-            _context = context;
+            _appDbContext = appDbContext;
         }
 
-        public async Task AddAsync(User user)
+        public async Task<AppUser?> GetUserByRefreshTokenAsync(string refreshToken)
         {
-            await _context.Users.AddAsync(user);
+            return await _appDbContext.Users
+                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
         }
 
-        public async Task<bool> AnyByEmailAsync(string email)
+        public async Task<AppUser?> GetByResetTokenAsync(string resetToken)
         {
-            return await _context.Users.AnyAsync(u => u.Email == email);
-
+            return await _appDbContext.Users
+                .FirstOrDefaultAsync(u => u.ResetToken == resetToken);
         }
 
-        public async Task<User?> GetByEmailAsync(string email)
+        public async Task<AppUser?> GetByRefreshTokenAsync(string refreshToken)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-        }
-
-        public async Task<List<User>> GetAllAsync()
-        {
-            return await _context.Users.ToListAsync();
+            return await _appDbContext.Users
+                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
         }
 
 
-        public async Task<User?> GetByIdAsync(string userId)
+        public async Task<int> SaveChangesAsync()
         {
-            return await _context.Users.FindAsync(userId);
-        }
-
-        public async Task DeleteAsync(User user)
-        {
-            _context.Users.Remove(user);
-        }
-
-        public async Task<User?> GetByResetTokenAsync(string token)
-        {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.ResetToken == token && u.ResetTokenExpiry > DateTime.UtcNow);
-        }
-
-
-        public async Task<User?> GetUserByRefreshTokenAsync(string refreshToken)
-        {
-            return await _context.Users
-                .Include(u => u.RefreshTokens)
-                .FirstOrDefaultAsync(u => u.RefreshTokens.Any(rt =>
-                    rt.Token == refreshToken &&
-                    rt.Revoked == null &&
-                    rt.Expires > DateTime.UtcNow));
-        }
-
-
-
-
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
+            return await _appDbContext.SaveChangesAsync();
         }
     }
 }

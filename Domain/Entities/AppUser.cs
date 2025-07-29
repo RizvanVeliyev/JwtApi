@@ -2,10 +2,15 @@
 
 namespace Domain.Entities
 {
-    public class AppUser:IdentityUser
+    public class AppUser : IdentityUser
     {
-        public string FullName { get; set; }
+        public string Name { get; set; } = null!;
+        public string Surname { get; set; } = null!;
+
+        public string? ResetToken { get; set; }
+        public DateTime? ResetTokenExpiry { get; set; }
         public string RefreshToken { get; set; }
-        public DateTime? RefreshTokenExpiryTime { get; set; }
+        public DateTime? RefreshRevoked { get; set; }
+        public DateTime RefreshExpires { get; set; }
     }
 }

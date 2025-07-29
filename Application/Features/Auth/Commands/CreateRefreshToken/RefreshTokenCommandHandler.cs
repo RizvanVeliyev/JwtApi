@@ -1,6 +1,7 @@
 ﻿using Application.Services.Abstractions;
 using MediatR;
 using Persistence.Repositories.Abstractions;
+using System.Linq;
 using System.Security.Authentication;
 
 namespace Application.Features.Auth.Commands.CreateRefreshToken
@@ -18,29 +19,33 @@ namespace Application.Features.Auth.Commands.CreateRefreshToken
 
         public async Task<AuthResponseDto> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userRepository.GetUserByRefreshTokenAsync(request.RefreshToken);
+            var user = await _userRepository.GetByRefreshTokenAsync(request.RefreshToken);
             if (user == null)
                 throw new AuthenticationException("Invalid refresh token");
 
-            var refreshToken = user.RefreshTokens.FirstOrDefault(rt => rt.Token == request.RefreshToken);
-
-            if (refreshToken == null || refreshToken.Revoked != null || refreshToken.Expires <= DateTime.UtcNow)
+            // İndi user.RefreshToken tək string olduğu üçün:
+            if (user.RefreshToken != request.RefreshToken || user.RefreshRevoked != null || user.RefreshExpires <= DateTime.UtcNow)
                 throw new AuthenticationException("Refresh token is expired or revoked");
 
-            refreshToken.Revoked = DateTime.UtcNow;
+            // Refresh tokeni yeniləyirik
+            user.RefreshRevoked = DateTime.UtcNow;
 
             var newRefreshToken = _tokenService.GenerateRefreshToken();
-            user.RefreshTokens.Add(newRefreshToken);
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshExpires = DateTime.UtcNow.AddDays(7); 
+            user.RefreshRevoked = null; 
 
             await _userRepository.SaveChangesAsync();
 
-            var accessToken = _tokenService.CreateToken(user);
+            var accessToken = await _tokenService.CreateToken(user);
 
             return new AuthResponseDto
             {
                 AccessToken = accessToken,
-                RefreshToken = newRefreshToken.Token
+                RefreshToken = newRefreshToken
             };
         }
     }
+
 }

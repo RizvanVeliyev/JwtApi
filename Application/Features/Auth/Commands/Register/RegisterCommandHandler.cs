@@ -1,17 +1,21 @@
 ﻿using Application.Services.Abstractions;
 using Domain.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Persistence.Repositories.Abstractions;
 
 namespace Application.Features.Auth.Commands.Register
 {
     public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterResponseDto>
     {
-        private readonly IUserRepository _userRepository;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly ITokenService _tokenService;
 
-        public RegisterCommandHandler( IUserRepository userRepository)
+
+        public RegisterCommandHandler(UserManager<AppUser> userManager, ITokenService tokenService)
         {
-            _userRepository = userRepository;
+            _userManager = userManager;
+            _tokenService = tokenService;
         }
 
 
@@ -19,31 +23,49 @@ namespace Application.Features.Auth.Commands.Register
         {
             var dto = request.Request;
 
-            var exists = await _userRepository.AnyByEmailAsync(dto.Email);
-            if (exists)
+            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
+            if (existingUser != null)
                 throw new Exception("User already exists");
 
-            var user = new User
+            var names = dto.FullName?.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+            var name = names != null && names.Length > 0 ? names[0] : "";
+            var surname = names != null && names.Length > 1 ? names[1] : "";
+
+
+            var user = new AppUser
             {
-                Id = Guid.NewGuid().ToString(),
+                UserName = dto.FullName,  
                 Email = dto.Email,
-                Password = dto.Password,
-                FullName = dto.FullName,
-                Role = dto.Role
+                Name = name,
+                Surname = surname
             };
+            var refreshToken = _tokenService.GenerateRefreshToken();
 
-            await _userRepository.AddAsync(user);
-            await _userRepository.SaveChangesAsync();
+            user.RefreshToken = refreshToken;
+            user.RefreshExpires = DateTime.UtcNow.AddDays(7);
 
+            var result = await _userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                //hazir goturmusem
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new Exception(errors);
+            }
 
+            
+
+            var roleName = dto.Role.ToString();
+            await _userManager.AddToRoleAsync(user, roleName);
+
+          
             return new RegisterResponseDto
             {
                 Id = user.Id,
                 Email = user.Email,
-                FullName=user.FullName
-
+                FullName = dto.FullName
                 //automapper yazacam
             };
+
         }
     }
 }

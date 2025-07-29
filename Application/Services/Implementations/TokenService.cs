@@ -1,5 +1,7 @@
 ﻿using Application.Services.Abstractions;
 using Domain.Entities;
+using Domain.Enums;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,19 +14,23 @@ namespace Application.Services.Implementations
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _config;
-        public TokenService(IConfiguration config)
+        private readonly UserManager<AppUser> _userManager;
+        public TokenService(IConfiguration config, UserManager<AppUser> userManager)
         {
             _config = config;
+            _userManager = userManager;
         }
 
-        public string CreateToken(User user)
+        public async Task<string> CreateToken(AppUser user)
         {
+            var roles = await _userManager.GetRolesAsync(user); // Identity-dən rolu çəkirik
+            var roleName = roles.FirstOrDefault() ?? UserRole.Member.ToString();
 
             var claims = new List<Claim>{
-                new Claim(ClaimTypes.Name, user.FullName ?? ""),
+                new Claim(ClaimTypes.Name, user.Name ?? ""),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Role, user.Role.ToString() ?? "")
+                new Claim(ClaimTypes.Role, roleName)
             };
 
 
@@ -42,19 +48,15 @@ namespace Application.Services.Implementations
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public RefreshToken GenerateRefreshToken()
+        public string GenerateRefreshToken()
         {
             var randomBytes = new byte[32];
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomBytes);
 
 
-            return new RefreshToken
-            {
-                Token = Convert.ToBase64String(randomBytes),
-                Expires = DateTime.UtcNow.AddDays(7),
-                Created = DateTime.UtcNow
-            };
+            return Convert.ToBase64String(randomBytes);
+
         }
 
     }

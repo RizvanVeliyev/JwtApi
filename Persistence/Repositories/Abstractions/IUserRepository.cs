@@ -4,15 +4,12 @@ namespace Persistence.Repositories.Abstractions
 {
     public interface IUserRepository
     {
-        Task AddAsync(User user);
-        Task<User?> GetByEmailAsync(string email);
-        Task<bool> AnyByEmailAsync(string email);
-        Task<User?> GetByIdAsync(string userId);
-        Task SaveChangesAsync();
-        Task DeleteAsync(User user);
-        Task<User?> GetByResetTokenAsync(string token);
-        Task<User?> GetUserByRefreshTokenAsync(string refreshToken);
-        Task<List<User>> GetAllAsync();
+
+        Task<AppUser?> GetUserByRefreshTokenAsync(string refreshToken);
+        Task<int> SaveChangesAsync();
+
+        Task<AppUser?> GetByResetTokenAsync(string resetToken);
+        Task<AppUser?> GetByRefreshTokenAsync(string refreshToken);
 
 
 

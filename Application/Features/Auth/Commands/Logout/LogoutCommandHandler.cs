@@ -19,11 +19,12 @@ namespace Application.Features.Auth.Commands.Logout
             if (user == null)
                 throw new AuthenticationException("Invalid refresh token");
 
-            var refreshToken = user.RefreshTokens.FirstOrDefault(rt => rt.Token == request.RefreshToken);
-            if (refreshToken == null || refreshToken.Revoked != null)
+            // RefreshToken tək string olduğundan artıq list yoxdu
+            if (user.RefreshRevoked != null)
                 throw new AuthenticationException("Refresh token already revoked or invalid");
 
-            refreshToken.Revoked = DateTime.UtcNow;
+            user.RefreshRevoked = DateTime.UtcNow;
+
             await _userRepository.SaveChangesAsync();
 
             return true;

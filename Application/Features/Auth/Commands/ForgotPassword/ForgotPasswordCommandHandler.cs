@@ -1,5 +1,7 @@
 ﻿using Application.Services.Abstractions;
+using Domain.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Persistence.Repositories.Abstractions;
 
 namespace Application.Features.Auth.Commands.ForgotPassword
@@ -8,16 +10,19 @@ namespace Application.Features.Auth.Commands.ForgotPassword
     {
       
         private readonly IUserRepository _userRepository;
+        private readonly UserManager<AppUser> _userManager;
 
 
-        public ForgotPasswordHandler( IUserRepository userRepository = null)
+
+        public ForgotPasswordHandler(IUserRepository userRepository = null, UserManager<AppUser> userManager = null)
         {
             _userRepository = userRepository;
+            _userManager = userManager;
         }
 
         public async Task<string?> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userRepository.GetByEmailAsync(request.Email);
+            var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
                 return null;
 
@@ -25,7 +30,11 @@ namespace Application.Features.Auth.Commands.ForgotPassword
             user.ResetToken = token;
             user.ResetTokenExpiry = DateTime.UtcNow.AddMinutes(15);
 
-            await _userRepository.SaveChangesAsync();
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+                return null;
+            
             var link = $"token={token}";
 
 

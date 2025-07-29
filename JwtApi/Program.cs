@@ -1,19 +1,38 @@
 using Application.Features.Auth.Commands.Register;
 using Application.Services.Abstractions;
 using Application.Services.Implementations;
+using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Persistence;
 using Persistence.Contexts;
 using System.Security.Claims;
 using System.Text;
-using Persistence;
+using Persistence.Contexts;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 3;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+
+    options.User.RequireUniqueEmail = true;
+
+    options.Lockout.MaxFailedAccessAttempts = 7;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
@@ -61,6 +80,13 @@ builder.Services.AddMediatR(typeof(RegisterCommand).Assembly);
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dataInit = scope.ServiceProvider.GetRequiredService<DataInit>();
+    await dataInit.InitDatabaseAsync();
+    // helelik bele yazdim, extension yazib birdefeye yazacam.
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -77,4 +103,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
