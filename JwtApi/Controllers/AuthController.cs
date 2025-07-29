@@ -7,6 +7,7 @@ using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.Register;
 using Application.Features.Auth.Commands.ResetPassword;
 using Application.Features.Auth.Commands.Update;
+using Application.Features.Auth.Commands.VerifyTwoFactor;
 using Application.Features.Auth.Queries.GetAllUsers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -81,6 +82,18 @@ namespace JwtApi.Controllers
 
             if (!result) return BadRequest("Invalid token or passwords do not match");
             return Ok("Password successfully changed");
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> VerifyTwoFactor([FromBody] VerifyTwoFactorRequestDto requestDto)
+        {
+            var command = new VerifyTwoFactorCommand { Request = requestDto };
+            var result = await _mediator.Send(command);
+
+            if (!string.IsNullOrEmpty(result.Token))
+                return Ok(result);
+
+            return BadRequest(new { message = result.Message });
         }
     }
 
