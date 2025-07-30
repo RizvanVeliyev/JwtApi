@@ -37,7 +37,8 @@ namespace Application.Features.Auth.Commands.Register
                 UserName = dto.FullName,  
                 Email = dto.Email,
                 Name = name,
-                Surname = surname
+                Surname = surname,
+                TwoFactorEnabled = true
             };
             var refreshToken = _tokenService.GenerateRefreshToken();
 
@@ -62,7 +63,8 @@ namespace Application.Features.Auth.Commands.Register
             {
                 Id = user.Id,
                 Email = user.Email,
-                FullName = dto.FullName
+                FullName = dto.FullName,
+                TwoFactorEnabled = user.TwoFactorEnabled
                 //automapper yazacam
             };
 
